@@ -8,6 +8,10 @@ RUN apk add --no-cache \
     curl \
     wget
 
+# Copiar configuración del sitio (ambos formatos para compatibilidad)
+COPY sites-available/default.conf /etc/nginx/conf.d/default.conf
+COPY sites-available/default /etc/nginx/conf.d/default
+
 # Configuración Nginx optimizada para máximo rendimiento
 RUN echo "# NGINX OPTIMIZADO PARA MÁXIMO RENDIMIENTO" > /etc/nginx/nginx.conf \
     && echo "" >> /etc/nginx/nginx.conf \
