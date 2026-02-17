@@ -113,7 +113,12 @@ if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
     mkdir -p /root/.composer
     echo '{"config":{"platform-check":false,"allow-plugins":{"*":true}}}' > /root/.composer/config.json
     
+    # Agregar repositorio alternativo para pdfmerger (el original ya no existe)
+    echo "🔧 Configurando repositorio alternativo para pdfmerger..."
+    composer config repositories.pdfmerger vcs https://github.com/myokyawhtun/PDFMerger
+    
     # Instalar dependencias (igual que en manual)
+    echo "⏳ Instalando dependencias (esto puede tomar varios minutos)..."
     COMPOSER_PROCESS_TIMEOUT=600 composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-interaction --verbose
     
     echo "✅ Dependencias instaladas"
