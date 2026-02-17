@@ -202,6 +202,12 @@ php artisan cache:clear || true
 # Configurar permisos para www-data (usuario de PHP-FPM)
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
+# CRÍTICO: Asegurar que www-data pueda leer todos los archivos de la aplicación
+echo "🔐 Configurando permisos de lectura para www-data..."
+chown -R www-data:www-data /var/www/html 2>/dev/null || true
+chmod -R 755 /var/www/html 2>/dev/null || true
+chmod -R 777 storage bootstrap/cache 2>/dev/null || true
+
 echo "✅ Configuración completada"
 echo "🎉 APIDIAN está listo para usar"
 
