@@ -72,7 +72,7 @@ services:
       MYSQL_ROOT_HOST: '%'
       TZ: America/Bogota
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - apidian_mysql_data:/var/lib/mysql
       - ./docker/mariadb/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
