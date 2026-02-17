@@ -106,8 +106,13 @@ echo "✅ MariaDB está listo y acepta conexiones"
 if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
     echo "📦 Instalando dependencias de Composer..."
     
-    # Limpiar composer.lock como en la instalación manual
+    # Limpiar composer.lock y cache como en la instalación manual
     rm -f composer.lock
+    
+    # Limpiar cache de Composer completamente
+    echo "🧹 Limpiando cache de Composer..."
+    composer clear-cache
+    rm -rf /root/.composer/cache
     
     # Configurar Composer
     mkdir -p /root/.composer
@@ -116,6 +121,10 @@ if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
     # Agregar repositorio alternativo para pdfmerger (el original ya no existe)
     echo "🔧 Configurando repositorio alternativo para pdfmerger..."
     composer config repositories.pdfmerger vcs https://github.com/myokyawhtun/PDFMerger
+    
+    # Actualizar composer.json para usar el nuevo repositorio
+    echo "📝 Actualizando composer.json..."
+    composer require rguedes/pdfmerger:^1.0 --no-update --ignore-platform-reqs
     
     # Instalar dependencias (igual que en manual)
     echo "⏳ Instalando dependencias (esto puede tomar varios minutos)..."
