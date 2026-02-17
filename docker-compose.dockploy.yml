@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    container_name: apidian_nginx
+    working_dir: /var/www/html
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www/html:cached
+      - ./docker/nginx/sites-available:/etc/nginx/conf.d
+      - nginx_cache:/var/cache/nginx
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - php
+    networks:
+      - api_dian
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: apidian_php
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:cached
+      - php_sessions:/tmp
+      - composer_cache:/root/.composer
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - api_dian
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_DATABASE=apidian
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=file
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php", "-v"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mariadb:
+    image: mariadb:10.3
+    container_name: apidian_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: apidian
+      MYSQL_USER: apidian
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_HOST: '%'
+      TZ: America/Bogota
+    ports:
+      - "3306:3306"
+    volumes:
+      - apidian_mysql_data:/var/lib/mysql
+      - ./docker/mariadb/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    networks:
+      - api_dian
+    command: >
+      --character-set-server=utf8
+      --collation-server=utf8_spanish_ci
+      --max-connections=200
+      --innodb-buffer-pool-size=256M
+      --innodb-log-file-size=64M
+      --skip-name-resolve
+      --default-time-zone='-05:00'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: apidian_redis
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+    volumes:
+      - redis_data:/data
+    networks:
+      - api_dian
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  api_dian:
+    driver: bridge
+
+volumes:
+  apidian_mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  nginx_cache:
+    driver: local
+  nginx_logs:
+    driver: local
+  php_sessions:
+    driver: local
+  composer_cache:
+    driver: local

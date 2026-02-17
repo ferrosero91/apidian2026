@@ -84,7 +84,18 @@ RUN echo "[www]" > /usr/local/etc/php-fpm.d/zz-performance.conf \
     && echo "pm.max_requests = 1000" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
     && echo "pm.process_idle_timeout = 60s" >> /usr/local/etc/php-fpm.d/zz-performance.conf
 
-# Configurar timezone para Colombia
+# Configurar timezone UTC-5 (America/Bogota - Colombia)
+ENV TZ=America/Bogota
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Configurar timezone en PHP
 RUN echo "date.timezone = America/Bogota" >> /usr/local/etc/php/conf.d/custom.ini
 
 WORKDIR /var/www/html
+
+# Copiar script de entrypoint desde la raíz del proyecto
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["php-fpm"]
