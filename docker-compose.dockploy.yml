@@ -18,6 +18,7 @@ services:
       - "traefik.http.services.apidian.loadbalancer.server.port=80"
     volumes:
       - ./:/var/www/html:cached
+      - ./docker/nginx/sites-available:/etc/nginx/conf.d
       - nginx_cache:/var/cache/nginx
       - nginx_logs:/var/log/nginx
     depends_on:
