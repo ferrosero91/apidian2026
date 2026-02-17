@@ -52,7 +52,17 @@ ALLOW_PUBLIC_REGISTER=${ALLOW_PUBLIC_REGISTER:-true}
 VALIDATE_BEFORE_SENDING=${VALIDATE_BEFORE_SENDING:-true}
 EOF
     echo "✅ Archivo .env creado"
+else
+    echo "✅ Archivo .env ya existe"
 fi
+
+# Debug: Mostrar configuración de DB
+echo "🔍 Configuración de base de datos:"
+echo "   DB_HOST: ${DB_HOST:-mariadb}"
+echo "   DB_PORT: ${DB_PORT:-3306}"
+echo "   DB_DATABASE: ${DB_DATABASE:-apidian}"
+echo "   DB_USERNAME: ${DB_USERNAME:-apidian}"
+echo "   DB_PASSWORD: $([ -n "$DB_PASSWORD" ] && echo "***configurado***" || echo "NO CONFIGURADO")"
 
 # Esperar a que MariaDB esté listo
 echo "⏳ Esperando MariaDB..."
