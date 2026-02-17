@@ -51,15 +51,27 @@ services:
     networks:
       - api_dian
     environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
-      - DB_HOST=mariadb
-      - DB_PORT=3306
-      - DB_DATABASE=apidian
-      - CACHE_DRIVER=file
-      - SESSION_DRIVER=file
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - APP_NAME=${APP_NAME:-APIDIAN}
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=${APP_URL:-http://localhost}
+      - FORCE_HTTPS=${FORCE_HTTPS:-false}
+      - APP_TIMEZONE=${APP_TIMEZONE:-America/Bogota}
+      - DB_CONNECTION=${DB_CONNECTION:-mysql}
+      - DB_HOST=${DB_HOST:-mariadb}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-apidian}
+      - DB_USERNAME=${DB_USERNAME:-apidian}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - CACHE_DRIVER=${CACHE_DRIVER:-file}
+      - SESSION_DRIVER=${SESSION_DRIVER:-file}
+      - QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - ALLOW_PUBLIC_DOWNLOAD=${ALLOW_PUBLIC_DOWNLOAD:-true}
+      - ALLOW_PUBLIC_REGISTER=${ALLOW_PUBLIC_REGISTER:-true}
+      - VALIDATE_BEFORE_SENDING=${VALIDATE_BEFORE_SENDING:-true}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "php", "-v"]
