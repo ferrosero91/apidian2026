@@ -68,10 +68,19 @@ echo "   DB_PASSWORD: $([ -n "$DB_PASSWORD" ] && echo "***configurado***" || ech
 echo "⏳ Esperando MariaDB..."
 MAX_TRIES=30
 COUNTER=0
-until php artisan migrate:status > /dev/null 2>&1; do
+
+# Instalar mysql client si no existe
+if ! command -v mysql &> /dev/null; then
+    apt-get update -qq && apt-get install -y -qq default-mysql-client > /dev/null 2>&1
+fi
+
+until mysql -h"${DB_HOST:-mariadb}" -u"${DB_USERNAME:-apidian}" -p"${DB_PASSWORD}" -e "SELECT 1" > /dev/null 2>&1; do
     COUNTER=$((COUNTER+1))
     if [ $COUNTER -gt $MAX_TRIES ]; then
         echo "❌ Error: MariaDB no respondió después de $MAX_TRIES intentos"
+        echo "🔍 Intentando diagnóstico..."
+        echo "   Probando conexión sin password..."
+        mysql -h"${DB_HOST:-mariadb}" -u"${DB_USERNAME:-apidian}" -e "SELECT 1" 2>&1 || true
         exit 1
     fi
     echo "   MariaDB no está listo, esperando... (intento $COUNTER/$MAX_TRIES)"
