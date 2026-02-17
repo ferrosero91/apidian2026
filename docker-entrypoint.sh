@@ -118,13 +118,9 @@ if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
     mkdir -p /root/.composer
     echo '{"config":{"platform-check":false,"allow-plugins":{"*":true}}}' > /root/.composer/config.json
     
-    # Agregar repositorio alternativo para pdfmerger (el original ya no existe)
-    echo "🔧 Configurando repositorio alternativo para pdfmerger..."
-    composer config repositories.pdfmerger vcs https://github.com/myokyawhtun/PDFMerger
-    
-    # Actualizar composer.json para usar el nuevo repositorio
-    echo "📝 Actualizando composer.json..."
-    composer require rguedes/pdfmerger:^1.0 --no-update --ignore-platform-reqs
+    # Remover paquete problemático (no es crítico para DIAN)
+    echo "🔧 Removiendo paquete problemático rguedes/pdfmerger..."
+    composer remove rguedes/pdfmerger --no-update --ignore-platform-reqs 2>/dev/null || true
     
     # Instalar dependencias (igual que en manual)
     echo "⏳ Instalando dependencias (esto puede tomar varios minutos)..."
