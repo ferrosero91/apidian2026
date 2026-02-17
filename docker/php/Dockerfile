@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libmagickwand-dev \
     imagemagick \
+    default-mysql-client \
+    netcat \
+    iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # Configurar e instalar extensiones PHP (EXACTAS según guía original)

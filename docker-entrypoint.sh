@@ -69,24 +69,38 @@ echo "⏳ Esperando MariaDB..."
 MAX_TRIES=30
 COUNTER=0
 
-# Instalar mysql client si no existe
-if ! command -v mysql &> /dev/null; then
-    apt-get update -qq && apt-get install -y -qq default-mysql-client > /dev/null 2>&1
+# Primero verificar que el host responde
+echo "🔍 Verificando conectividad de red con MariaDB..."
+if ! ping -c 1 -W 2 "${DB_HOST:-mariadb}" > /dev/null 2>&1; then
+    echo "❌ Error: No se puede alcanzar el host ${DB_HOST:-mariadb}"
+    echo "   Verifica que el servicio MariaDB esté en la misma red Docker"
+    exit 1
 fi
+echo "✅ Host ${DB_HOST:-mariadb} es alcanzable"
 
+# Ahora intentar conectar con MySQL
 until mysql -h"${DB_HOST:-mariadb}" -u"${DB_USERNAME:-apidian}" -p"${DB_PASSWORD}" -e "SELECT 1" > /dev/null 2>&1; do
     COUNTER=$((COUNTER+1))
     if [ $COUNTER -gt $MAX_TRIES ]; then
         echo "❌ Error: MariaDB no respondió después de $MAX_TRIES intentos"
-        echo "🔍 Intentando diagnóstico..."
-        echo "   Probando conexión sin password..."
-        mysql -h"${DB_HOST:-mariadb}" -u"${DB_USERNAME:-apidian}" -e "SELECT 1" 2>&1 || true
+        echo ""
+        echo "🔍 DIAGNÓSTICO DETALLADO:"
+        echo "   Host: ${DB_HOST:-mariadb}"
+        echo "   Puerto: ${DB_PORT:-3306}"
+        echo "   Usuario: ${DB_USERNAME:-apidian}"
+        echo "   Base de datos: ${DB_DATABASE:-apidian}"
+        echo ""
+        echo "   Intentando conexión con output de error:"
+        mysql -h"${DB_HOST:-mariadb}" -P"${DB_PORT:-3306}" -u"${DB_USERNAME:-apidian}" -p"${DB_PASSWORD}" -e "SELECT 1" 2>&1 || true
+        echo ""
+        echo "   Verificando si MariaDB está escuchando:"
+        nc -zv "${DB_HOST:-mariadb}" "${DB_PORT:-3306}" 2>&1 || true
         exit 1
     fi
     echo "   MariaDB no está listo, esperando... (intento $COUNTER/$MAX_TRIES)"
     sleep 5
 done
-echo "✅ MariaDB está listo"
+echo "✅ MariaDB está listo y acepta conexiones"
 
 # Verificar si ya está instalado
 if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
