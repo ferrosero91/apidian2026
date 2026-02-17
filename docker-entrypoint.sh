@@ -3,6 +3,57 @@ set -e
 
 echo "🚀 Iniciando configuración de APIDIAN..."
 
+# Crear .env desde variables de entorno si no existe
+if [ ! -f ".env" ]; then
+    echo "📝 Creando archivo .env desde variables de entorno..."
+    cat > .env << EOF
+APP_NAME="${APP_NAME:-APIDIAN}"
+APP_VERSION=" v2.1"
+APP_ENV=${APP_ENV:-production}
+APP_KEY=${APP_KEY:-}
+APP_DEBUG=${APP_DEBUG:-false}
+APP_PORT=80
+APP_URL=${APP_URL:-http://localhost}
+FORCE_HTTPS=${FORCE_HTTPS:-false}
+
+LOG_CHANNEL=stack
+APP_TIMEZONE=${APP_TIMEZONE:-America/Bogota}
+
+DB_CONNECTION=${DB_CONNECTION:-mysql}
+DB_HOST=${DB_HOST:-mariadb}
+DB_PORT=${DB_PORT:-3306}
+DB_DATABASE=${DB_DATABASE:-apidian}
+DB_USERNAME=${DB_USERNAME:-apidian}
+DB_PASSWORD=${DB_PASSWORD:-}
+
+BROADCAST_DRIVER=log
+CACHE_DRIVER=${CACHE_DRIVER:-file}
+QUEUE_CONNECTION=${QUEUE_CONNECTION:-sync}
+SESSION_DRIVER=${SESSION_DRIVER:-file}
+SESSION_LIFETIME=120
+
+REDIS_HOST=${REDIS_HOST:-redis}
+REDIS_PASSWORD=null
+REDIS_PORT=${REDIS_PORT:-6379}
+
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=null
+MAIL_FROM_NAME=
+
+ALLOW_PUBLIC_DOWNLOAD=${ALLOW_PUBLIC_DOWNLOAD:-true}
+APPLY_SEND_CUSTORMER_CREDENTIALS=${APPLY_SEND_CUSTORMER_CREDENTIALS:-true}
+GRAPHIC_REPRESENTATION_TEMPLATE=2
+ALLOW_PUBLIC_REGISTER=${ALLOW_PUBLIC_REGISTER:-true}
+VALIDATE_BEFORE_SENDING=${VALIDATE_BEFORE_SENDING:-true}
+EOF
+    echo "✅ Archivo .env creado"
+fi
+
 # Esperar a que MariaDB esté listo
 echo "⏳ Esperando MariaDB..."
 MAX_TRIES=30
