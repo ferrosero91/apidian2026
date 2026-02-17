@@ -151,18 +151,19 @@ if [ -f "storage.zip" ] && [ ! -f "/tmp/storage_unzipped" ]; then
     echo "✅ Storage descomprimido"
 fi
 
+# CRÍTICO: Crear directorios de cache de Laravel si no existen (DESPUÉS de descomprimir)
+echo "📁 Asegurando directorios de cache de Laravel..."
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/framework/cache
+mkdir -p storage/framework/testing
+mkdir -p storage/logs
+mkdir -p storage/app/public
+
 # Configurar permisos (igual que en manual: chmod -R 777)
 echo "🔐 Configurando permisos..."
 chmod -R 777 storage bootstrap/cache 2>/dev/null || true
 [ -d "vendor/mpdf/mpdf" ] && chmod -R 777 vendor/mpdf/mpdf 2>/dev/null || true
-
-# CRÍTICO: Crear directorios de cache de Laravel si no existen
-echo "📁 Creando directorios de cache..."
-mkdir -p storage/framework/sessions
-mkdir -p storage/framework/views
-mkdir -p storage/framework/cache
-mkdir -p storage/logs
-chmod -R 777 storage 2>/dev/null || true
 
 # Cachear configuración (igual que en manual)
 echo "💾 Cacheando configuración..."
