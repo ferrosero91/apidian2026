@@ -28,8 +28,8 @@ services:
 
   php:
     build:
-      context: ./docker/php
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/php/Dockerfile
     container_name: apidian_php
     working_dir: /var/www/html
     volumes:

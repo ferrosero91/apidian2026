@@ -93,8 +93,8 @@ RUN echo "date.timezone = America/Bogota" >> /usr/local/etc/php/conf.d/custom.in
 
 WORKDIR /var/www/html
 
-# Copiar script de entrypoint desde la raíz del proyecto (dos niveles arriba)
-COPY ../../docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# Copiar script de entrypoint desde la raíz del proyecto
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
