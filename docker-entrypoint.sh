@@ -205,5 +205,18 @@ chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 echo "✅ Configuración completada"
 echo "🎉 APIDIAN está listo para usar"
 
+# Debug: Verificar que los archivos existen
+echo "🔍 Verificando archivos críticos..."
+if [ -f "public/index.php" ]; then
+    echo "   ✅ public/index.php existe"
+    ls -lah public/index.php
+else
+    echo "   ❌ ERROR: public/index.php NO EXISTE"
+    echo "   Contenido de /var/www/html:"
+    ls -lah /var/www/html/ || true
+    echo "   Contenido de /var/www/html/public:"
+    ls -lah /var/www/html/public/ || true
+fi
+
 # Mantener el contenedor corriendo
 exec "$@"
