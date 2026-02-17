@@ -216,6 +216,8 @@ echo "🔍 Verificando archivos críticos..."
 if [ -f "public/index.php" ]; then
     echo "   ✅ public/index.php existe"
     ls -lah public/index.php
+    echo "   📄 Primeras líneas del archivo:"
+    head -n 5 public/index.php
 else
     echo "   ❌ ERROR: public/index.php NO EXISTE"
     echo "   Contenido de /var/www/html:"
@@ -223,6 +225,11 @@ else
     echo "   Contenido de /var/www/html/public:"
     ls -lah /var/www/html/public/ || true
 fi
+
+# Verificar configuración de PHP-FPM
+echo "🔍 Verificando configuración de PHP-FPM..."
+echo "   Usuario PHP-FPM: $(ps aux | grep php-fpm | grep -v grep | head -1 | awk '{print $1}')"
+echo "   Working directory: $(pwd)"
 
 # Mantener el contenedor corriendo
 exec "$@"

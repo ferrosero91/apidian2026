@@ -85,7 +85,11 @@ RUN echo "[www]" > /usr/local/etc/php-fpm.d/zz-performance.conf \
     && echo "pm.min_spare_servers = 5" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
     && echo "pm.max_spare_servers = 15" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
     && echo "pm.max_requests = 1000" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
-    && echo "pm.process_idle_timeout = 60s" >> /usr/local/etc/php-fpm.d/zz-performance.conf
+    && echo "pm.process_idle_timeout = 60s" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
+    && echo "chdir = /var/www/html" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
+    && echo "catch_workers_output = yes" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
+    && echo "php_admin_value[error_log] = /var/log/fpm-php.www.log" >> /usr/local/etc/php-fpm.d/zz-performance.conf \
+    && echo "php_admin_flag[log_errors] = on" >> /usr/local/etc/php-fpm.d/zz-performance.conf
 
 # Configurar timezone UTC-5 (America/Bogota - Colombia)
 ENV TZ=America/Bogota
