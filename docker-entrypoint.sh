@@ -19,6 +19,9 @@ FORCE_HTTPS=${FORCE_HTTPS:-false}
 LOG_CHANNEL=stack
 APP_TIMEZONE=${APP_TIMEZONE:-America/Bogota}
 
+# CRÍTICO: Path absoluto para views compiladas (evita error realpath)
+VIEW_COMPILED_PATH=/var/www/html/storage/framework/views
+
 DB_CONNECTION=${DB_CONNECTION:-mysql}
 DB_HOST=${DB_HOST:-mariadb}
 DB_PORT=${DB_PORT:-3306}
