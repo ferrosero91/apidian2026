@@ -175,7 +175,8 @@ chmod -R 777 storage bootstrap/cache 2>/dev/null || true
 
 # Cachear configuración (igual que en manual)
 echo "💾 Cacheando configuración..."
-php artisan config:cache || true
+# NO cachear en Dockploy - causa problemas con paths
+# php artisan config:cache || true
 php artisan cache:clear || true
 
 # Crear enlace simbólico de storage (igual que en manual)
@@ -212,7 +213,7 @@ fi
 
 # Limpiar caché final (igual que en manual)
 echo "🧹 Limpiando caché final..."
-php artisan config:cache || true
+# NO cachear config en Dockploy
 php artisan config:clear || true
 php artisan cache:clear || true
 
