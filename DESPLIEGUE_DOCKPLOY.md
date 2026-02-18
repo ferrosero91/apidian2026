@@ -6,30 +6,69 @@
 
 ## 📋 Preparación (5 minutos)
 
-### 1. Configurar Variables de Entorno
+### 1. Generar Contraseñas Seguras
 
-Copia el archivo de ejemplo:
+**IMPORTANTE:** Las contraseñas NO se generan automáticamente. Debes crearlas tú.
+
+**Opción A: Usando OpenSSL (Linux/Mac/Git Bash)**
 ```bash
-cp .env.dockploy .env
+# Contraseña 1 (para DB_PASSWORD y MYSQL_PASSWORD)
+openssl rand -base64 16
+
+# Contraseña 2 (para MYSQL_ROOT_PASSWORD)
+openssl rand -base64 16
 ```
 
-Edita `.env` y cambia estos valores:
+**Opción B: Usando PowerShell (Windows)**
+```powershell
+# Contraseña 1
+-join ((48..57) + (65..90) + (97..122) | Get-Random -Count 16 | % {[char]$_})
 
+# Contraseña 2
+-join ((48..57) + (65..90) + (97..122) | Get-Random -Count 16 | % {[char]$_})
+```
+
+**Opción C: Generador Online**
+- Ve a: https://passwordsgenerator.net/
+- Longitud: 16 caracteres
+- Incluye: letras, números
+- Genera 2 contraseñas diferentes
+
+**Ejemplo de contraseñas generadas:**
+```
+Contraseña 1 (DB): xK9mP2nQ7vL4wR8t
+Contraseña 2 (ROOT): aB5cD8eF1gH3jK6m
+```
+
+**⚠️ GUARDA ESTAS CONTRASEÑAS** - Las necesitarás para:
+- Configurar variables de entorno en Dockploy
+- Conectarte a la base de datos
+- Backups y mantenimiento
+
+### 2. Configurar Variables de Entorno Localmente (Opcional)
+
+Si quieres probar localmente primero:
+```bash
+cp .env.dockploy .env
+nano .env
+```
+
+Edita y cambia:
 ```env
 APP_URL=https://apidian2.gestionxpress.app
 FORCE_HTTPS=true
 APP_TIMEZONE=America/Bogota
 
-# Genera contraseñas seguras (ejecuta: openssl rand -base64 16)
-DB_PASSWORD=TU_PASSWORD_SEGURO_AQUI
-MYSQL_PASSWORD=TU_PASSWORD_SEGURO_AQUI
-MYSQL_ROOT_PASSWORD=TU_ROOT_PASSWORD_DIFERENTE
+# Pega las contraseñas que generaste arriba
+DB_PASSWORD=contraseña_1_aqui
+MYSQL_PASSWORD=contraseña_1_aqui
+MYSQL_ROOT_PASSWORD=contraseña_2_aqui
 ```
 
-**IMPORTANTE:** 
-- `DB_PASSWORD` y `MYSQL_PASSWORD` deben ser iguales
-- El timezone está configurado en UTC-5 (America/Bogota)
-- Genera contraseñas seguras con: `openssl rand -base64 16`
+**CRÍTICO:** 
+- `DB_PASSWORD` y `MYSQL_PASSWORD` **DEBEN SER IGUALES**
+- `MYSQL_ROOT_PASSWORD` debe ser diferente
+- Guarda estas contraseñas en un lugar seguro
 
 ### 2. Verificar Archivos
 
@@ -81,7 +120,9 @@ nslookup apidian2.gestionxpress.app
 
 ### Paso 3: Variables de Entorno
 
-En Dockploy, ve a **"Environment Variables"** y agrega (copia desde tu `.env`):
+En Dockploy, ve a **"Environment Variables"** y agrega:
+
+**IMPORTANTE:** Usa las contraseñas que generaste en el paso de preparación.
 
 ```
 APP_NAME=APIDIAN
@@ -96,9 +137,9 @@ DB_HOST=mariadb
 DB_PORT=3306
 DB_DATABASE=apidian
 DB_USERNAME=apidian
-DB_PASSWORD=tu_password_aqui
-MYSQL_PASSWORD=tu_password_aqui
-MYSQL_ROOT_PASSWORD=tu_root_password_aqui
+DB_PASSWORD=PEGA_CONTRASEÑA_1_AQUI
+MYSQL_PASSWORD=PEGA_CONTRASEÑA_1_AQUI
+MYSQL_ROOT_PASSWORD=PEGA_CONTRASEÑA_2_AQUI
 
 REDIS_HOST=redis
 REDIS_PORT=6379
@@ -111,6 +152,12 @@ ALLOW_PUBLIC_DOWNLOAD=true
 ALLOW_PUBLIC_REGISTER=true
 VALIDATE_BEFORE_SENDING=true
 ```
+
+**CRÍTICO:**
+- ⚠️ `DB_PASSWORD` y `MYSQL_PASSWORD` deben tener la **MISMA contraseña**
+- ⚠️ `MYSQL_ROOT_PASSWORD` debe tener una contraseña **DIFERENTE**
+- ⚠️ NO uses las contraseñas de ejemplo, usa las que generaste
+- ⚠️ Guarda estas contraseñas en un lugar seguro (las necesitarás para conectarte a la DB)
 
 ### Paso 4: Configurar Dominio
 
@@ -377,3 +424,75 @@ El `docker-entrypoint.sh` replica exactamente la instalación manual:
 - Collation: utf8_spanish_ci
 
 **Guarda esta información de forma segura.**
+
+
+---
+
+## 🔐 Primer Acceso a APIDIAN
+
+### ⚠️ IMPORTANTE: No hay usuario por defecto
+
+APIDIAN **NO tiene un usuario administrador por defecto**. Tienes dos opciones para crear tu cuenta:
+
+### Opción 1: Registro Web (Más Fácil) ✅
+
+1. Ve a: **https://apidian2.gestionxpress.app/register**
+2. Completa el formulario de registro
+3. Ingresa con tu email y contraseña
+
+### Opción 2: Crear Empresa vía API
+
+**Usando Postman:**
+
+1. Abre Postman
+2. Importa el archivo `ApiDianV2.1.postman_collection.json`
+3. Ve a: **01 - Configuraciones Basicas** → **Paso 1 - Config-Company**
+4. Modifica la URL con tu NIT y dígito de verificación:
+   ```
+   POST https://apidian2.gestionxpress.app/api/ubl2.1/config/{TU_NIT}/{DIGITO_VERIFICACION}
+   ```
+
+5. Modifica el body JSON con tus datos:
+   ```json
+   {
+       "type_document_identification_id": 3,
+       "type_organization_id": 2,
+       "type_regime_id": 2,
+       "type_liability_id": 14,
+       "business_name": "TU EMPRESA SAS",
+       "merchant_registration": "0000000-00",
+       "municipality_id": 820,
+       "address": "TU DIRECCION",
+       "phone": 3001234567,
+       "email": "tu@email.com",
+       "mail_host": "smtp.gmail.com",
+       "mail_port": "587",
+       "mail_username": "tuemail@gmail.com",
+       "mail_password": "tu_password_app",
+       "mail_encryption": "tls"
+   }
+   ```
+
+6. Envía la petición
+7. **GUARDA EL TOKEN** que te devuelve en el campo `api_token`
+
+**Credenciales de login:**
+- Email: El que configuraste
+- Contraseña: Tu NIT (sin dígito de verificación)
+
+**Ejemplo:**
+- NIT: `900123456-7`
+- Email: `admin@miempresa.com`
+- Contraseña: `900123456`
+
+### Recuperar Token Perdido
+
+Si pierdes el token, conéctate a la base de datos:
+
+```bash
+docker exec -it apidian_mariadb mysql -u apidian -p apidian -e "SELECT email, api_token FROM users WHERE email = 'tu@email.com';"
+```
+
+---
+
+**Ver instrucciones completas en:** `PRIMER_ACCESO.md`

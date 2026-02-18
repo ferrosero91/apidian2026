@@ -191,6 +191,119 @@ else
     echo "⚠️  Advertencia: Error en migraciones (puede ser normal si ya existen)"
 fi
 
+# Crear usuario administrador por defecto si no existe
+echo "👤 Verificando usuario administrador..."
+USER_EXISTS=$(mysql -h"${DB_HOST:-mariadb}" -u"${DB_USERNAME:-apidian}" -p"${DB_PASSWORD}" -D"${DB_DATABASE:-apidian}" -se "SELECT COUNT(*) FROM users WHERE email='admin@apidian.local';" 2>/dev/null || echo "0")
+
+if [ "$USER_EXISTS" = "0" ]; then
+    echo "👤 Creando usuario administrador por defecto..."
+    
+    # Generar contraseña aleatoria
+    ADMIN_PASSWORD=$(openssl rand -base64 12 | tr -d "=+/" | cut -c1-12)
+    ADMIN_EMAIL="admin@apidian.local"
+    ADMIN_NAME="Administrador"
+    
+    # Hash de contraseña usando PHP
+    PASSWORD_HASH=$(php -r "echo password_hash('${ADMIN_PASSWORD}', PASSWORD_BCRYPT);")
+    API_TOKEN=$(php -r "echo hash('sha256', '${ADMIN_EMAIL}${ADMIN_PASSWORD}');")
+    
+    # Crear usuario y empresa en la base de datos
+    mysql -h"${DB_HOST:-mariadb}" -u"${DB_USERNAME:-apidian}" -p"${DB_PASSWORD}" -D"${DB_DATABASE:-apidian}" <<EOSQL
+-- Crear usuario administrador
+INSERT INTO users (name, email, password, api_token, created_at, updated_at, id_administrator) 
+VALUES (
+    '${ADMIN_NAME}',
+    '${ADMIN_EMAIL}',
+    '${PASSWORD_HASH}',
+    '${API_TOKEN}',
+    NOW(),
+    NOW(),
+    1
+);
+
+SET @user_id = LAST_INSERT_ID();
+
+-- Crear empresa por defecto
+INSERT INTO companies (
+    user_id, 
+    identification_number, 
+    dv, 
+    language_id, 
+    tax_id, 
+    type_environment_id, 
+    payroll_type_environment_id,
+    eqdocs_type_environment_id,
+    type_operation_id, 
+    type_document_identification_id, 
+    country_id, 
+    type_currency_id, 
+    type_organization_id, 
+    type_regime_id, 
+    type_liability_id, 
+    municipality_id, 
+    merchant_registration, 
+    address, 
+    phone, 
+    created_at, 
+    updated_at
+) VALUES (
+    @user_id,
+    '999999999',
+    '9',
+    79,
+    1,
+    2,
+    2,
+    2,
+    10,
+    3,
+    46,
+    35,
+    2,
+    2,
+    14,
+    820,
+    '0000000-00',
+    'Dirección por defecto',
+    '3000000000',
+    NOW(),
+    NOW()
+);
+EOSQL
+
+    # Guardar credenciales en archivo
+    cat > /var/www/html/CREDENCIALES.txt << CREDS
+============================================
+CREDENCIALES APIDIAN - $(date)
+============================================
+
+URL: ${APP_URL:-http://localhost}
+
+USUARIO ADMINISTRADOR:
+  Email: ${ADMIN_EMAIL}
+  Contraseña: ${ADMIN_PASSWORD}
+
+BASE DE DATOS:
+  Host: ${DB_HOST:-mariadb}:${DB_PORT:-3306}
+  Database: ${DB_DATABASE:-apidian}
+  Usuario: ${DB_USERNAME:-apidian}
+  Password: ${DB_PASSWORD}
+
+============================================
+IMPORTANTE: Cambia la contraseña después del primer login
+============================================
+CREDS
+    
+    chmod 600 /var/www/html/CREDENCIALES.txt
+    
+    echo "✅ Usuario administrador creado"
+    echo "   📧 Email: ${ADMIN_EMAIL}"
+    echo "   🔑 Contraseña: ${ADMIN_PASSWORD}"
+    echo "   📄 Credenciales guardadas en: CREDENCIALES.txt"
+else
+    echo "✅ Usuario administrador ya existe"
+fi
+
 # Configurar permisos nuevamente (igual que en manual)
 echo "🔐 Configurando permisos finales..."
 chmod -R 777 storage 2>/dev/null || true
