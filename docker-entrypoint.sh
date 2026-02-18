@@ -159,6 +159,11 @@ mkdir -p storage/framework/cache
 mkdir -p storage/framework/testing
 mkdir -p storage/logs
 mkdir -p storage/app/public
+mkdir -p bootstrap/cache
+
+# CRÍTICO: Cambiar propietario a www-data ANTES de cualquier comando artisan
+echo "🔐 Configurando propietario www-data..."
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
 # Configurar permisos (igual que en manual: chmod -R 777)
 echo "🔐 Configurando permisos..."
