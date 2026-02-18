@@ -222,6 +222,11 @@ chown -R www-data:www-data /var/www/html 2>/dev/null || true
 chmod -R 755 /var/www/html 2>/dev/null || true
 chmod -R 777 storage bootstrap/cache 2>/dev/null || true
 
+# CRÍTICO: Limpiar cache de configuración para que Laravel vea los nuevos directorios
+echo "🧹 Limpiando cache de configuración final..."
+php artisan config:clear || true
+php artisan view:clear || true
+
 echo "✅ Configuración completada"
 echo "🎉 APIDIAN está listo para usar"
 
